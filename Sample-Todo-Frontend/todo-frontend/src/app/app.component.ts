@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { environment } from '../environments/environment';
-import { SignalRService } from './signalr.service';
 import { Todo } from './todo';
 
 @Component({
@@ -15,16 +14,7 @@ export class AppComponent implements OnInit {
   items: Todo[] = [];
   form = new FormGroup({});
 
-  constructor(
-    signalrService: SignalRService,
-    private readonly http: HttpClient
-  ) {
-    signalrService.itemAdded.subscribe((item) => this.items.push(item));
-    signalrService.itemUpdated.subscribe((item) => {
-      this.items = this.items.filter((x) => x.id !== item.id);
-      this.items.push(item);
-    });
-  }
+  constructor(private readonly http: HttpClient) {}
 
   ngOnInit() {
     this.http.get<Todo[]>(`${environment.apiUrl}todos/`).subscribe((items) => {

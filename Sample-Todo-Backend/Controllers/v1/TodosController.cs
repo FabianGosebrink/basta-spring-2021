@@ -5,9 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using server.Extensions;
-using server.Hubs;
 using server.Models;
 using server.Repositories;
 
@@ -18,16 +16,13 @@ namespace server.Controllers.v1
     [ApiController]
     public class TodosController : ControllerBase
     {
-        private readonly IHubContext<TodoHub> _todoHubContext;
         private readonly ITodoRepository _todoRepository;
         private readonly IMapper _mapper;
 
         public TodosController(
-            IHubContext<TodoHub> todoHubContext, 
             ITodoRepository todoRepository,
             IMapper mapper)
         {
-            _todoHubContext = todoHubContext;
             _todoRepository = todoRepository;
             _mapper = mapper;
         }
@@ -83,7 +78,7 @@ namespace server.Controllers.v1
                 throw new Exception("Adding an item failed on save.");
             }
 
-            await _todoHubContext.Clients.All.SendAsync("todo-added", newTodoEntity);
+
 
             return CreatedAtRoute(
                 nameof(GetSingle),
@@ -119,8 +114,6 @@ namespace server.Controllers.v1
 
             var updatedDto = _mapper.Map<TodoDto>(updatedTodo);
 
-            await _todoHubContext.Clients.All.SendAsync("todo-updated", updatedDto);
-
             return Ok(updatedDto);
         }
 
@@ -141,8 +134,6 @@ namespace server.Controllers.v1
             {
                 throw new Exception("Deleting an item failed on save.");
             }
-
-            _todoHubContext.Clients.All.SendAsync("todo-deleted");
 
             return NoContent();
         }
